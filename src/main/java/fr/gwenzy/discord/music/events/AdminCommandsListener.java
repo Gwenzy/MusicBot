@@ -1,5 +1,6 @@
 package fr.gwenzy.discord.music.events;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import fr.gwenzy.discord.music.Main;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -17,7 +18,7 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
         if(messageReceivedEvent.getMessage().getFormattedContent().startsWith(Main.COMMAND_PREFIX)){
             String[] args = messageReceivedEvent.getMessage().getFormattedContent().split(" ");
 
-            messageReceivedEvent.
+
 
             if(Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()))
                 if(args.length>1)
@@ -33,7 +34,30 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                     }
                     else if(args[1].equalsIgnoreCase("next")){
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.nextTrack();
+                    }
+                    else if(args[1].equalsIgnoreCase("disconnect")){
+                        Main.client.logout();
+                    }
+                    else if(args[1].equalsIgnoreCase("infos")){
 
+                        try {
+                            AudioTrackInfo infos = Main.musicManagers.get(338429681474863115L).player.getPlayingTrack().getInfo();
+                            EmbedBuilder eb = new EmbedBuilder();
+                            eb.withColor(Color.CYAN);
+                            eb.withTitle("Track informations");
+                            eb.withDesc("------------------------------------------------------------------");
+                            eb.appendField("Title", infos.title, false);
+                            eb.appendField("Youtube Channel", infos.author, false);
+                            eb.appendField("Duration", (infos.length/1000)+"s", false);
+                            eb.appendField("URL", infos.uri, false);
+
+                            messageReceivedEvent.getChannel().sendMessage(eb.build());
+                            messageReceivedEvent.getMessage().delete();
+
+                        }catch(Exception e){
+                            messageReceivedEvent.getChannel().sendMessage("No song is currently playing");
+                            e.printStackTrace();
+                        }
                     }
                 if(args.length>2)
                     if(args[1].equalsIgnoreCase("play")){
@@ -43,7 +67,7 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
 
                         }
                         System.out.println("Playing "+path);
-                        Main.loadAndPlay(messageReceivedEvent.getChannel(), args[2]);
+                        Main.loadAndPlay(messageReceivedEvent.getChannel(), path);
                     }
 
 

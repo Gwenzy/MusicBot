@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fr.gwenzy.discord.music.events.AdminCommandsListener;
+import fr.gwenzy.discord.music.events.ReadyListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
@@ -21,22 +22,20 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.MissingPermissionsException;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
   private static final Logger log = LoggerFactory.getLogger(Main.class);
   public static final List<String> operatorsID = Arrays.asList("205809466514472960", "224940744362819584", "214105906789613569");
 
-  public static final String COMMAND_PREFIX = "@Sagiri";
+  public static final String COMMAND_PREFIX = "@Sagiri ";
   public static IDiscordClient client;
   public static void main(String[] args) throws Exception {
     client = new ClientBuilder()
         .withToken("TOKEN")
             .registerListener(new Main())
             .registerListener(new AdminCommandsListener())
+            .registerListener(new ReadyListener())
         .login();
 
 
@@ -51,6 +50,10 @@ public class Main {
     this.playerManager = new DefaultAudioPlayerManager();
     AudioSourceManagers.registerRemoteSources(playerManager);
     AudioSourceManagers.registerLocalSource(playerManager);
+
+
+
+
 
   }
 
@@ -116,6 +119,7 @@ public class Main {
     connectToFirstVoiceChannel(guild.getAudioManager());
 
     musicManager.scheduler.queue(track);
+
 
   }
 
