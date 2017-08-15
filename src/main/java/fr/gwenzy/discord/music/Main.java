@@ -9,6 +9,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fr.gwenzy.discord.music.events.AdminCommandsListener;
 import fr.gwenzy.discord.music.events.ReadyListener;
+import fr.gwenzy.discord.music.youtube.Search;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
@@ -28,17 +29,23 @@ public class Main {
   private static final Logger log = LoggerFactory.getLogger(Main.class);
   public static final List<String> operatorsID = Arrays.asList("205809466514472960", "224940744362819584", "214105906789613569");
 
+
   public static final String COMMAND_PREFIX = "@Sagiri ";
+    public static Search search;
   public static IDiscordClient client;
+    public static HashMap<Integer, String> videoIDs = new HashMap<>();
+    public static boolean canUseIDs = false;
+
+
   public static void main(String[] args) throws Exception {
     client = new ClientBuilder()
-        .withToken("TOKEN")
+        .withToken(Tokens.TOKEN_BOT)
             .registerListener(new Main())
             .registerListener(new AdminCommandsListener())
             .registerListener(new ReadyListener())
         .login();
 
-
+    search = new Search();
   }
 
   public static AudioPlayerManager playerManager;

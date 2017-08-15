@@ -18,7 +18,6 @@ public class ReadyListener implements IListener<ReadyEvent> {
                     Main.client.changePlayingText("" + Main.musicManagers.get(338429681474863115L).player.getPlayingTrack().getInfo().title);
                 }catch(Exception e){
                     Main.client.changePlayingText("Nothing");
-                    e.printStackTrace();
                 }
             }
         }, 0, 1000);

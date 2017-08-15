@@ -2,13 +2,21 @@ package fr.gwenzy.discord.music.events;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import fr.gwenzy.discord.music.Main;
+import org.joda.time.Period;
+import org.joda.time.Seconds;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.RequestBuffer;
 
 import java.awt.*;
+import java.io.IOException;
+import java.util.List;
+
 
 /**
  * Created by gwend on 06/08/2017.
@@ -69,9 +77,78 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                         System.out.println("Playing "+path);
                         Main.loadAndPlay(messageReceivedEvent.getChannel(), path);
                     }
+                    else if (args[1].equalsIgnoreCase("search")){
+                        String query = args[2];
+                        for(int i=3; i<args.length; i++){
+                            query += " "+ args[i];
+
+                        }
+                        List<String> results = null;
+                        try {
+                            results = Main.search.search(query);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        int id=1;
+                        for(String str : results){
+                            EmbedBuilder eb = new EmbedBuilder();
+                            eb.withColor(Color.CYAN);
+                            eb.withTitle("Query result | ID #"+id);
+                            eb.withDesc("------------------------------------------------------------------");
+
+                            String title = str.split("!;;!")[0];
+                            String videoID = str.split("!;;!")[1];
+                            String duration = str.split("!;;!")[2];
+                            String channel = str.split("!;;!")[3];
+                            String thumbnailURL = str.split("!;;!")[4];
+
+                            PeriodFormatter formatter = ISOPeriodFormat.standard();
+                            Period p = formatter.parsePeriod(duration);
+                            duration = String.format("%02d", p.getMinutes())+":"+String.format("%02d", p.getSeconds());
+
+
+                            eb.appendField("Title", title, false);
+                            eb.appendField("ID", videoID, false);
+
+                            eb.appendField("Duration", duration, false);
+                            eb.appendField("Channel", channel, false);
+                            eb.withThumbnail(thumbnailURL);
+                            System.out.println("URL: "+thumbnailURL);
+                            Main.canUseIDs = true;
+                            Main.videoIDs.put(id, videoID);
+
+                            RequestBuffer.request(() -> {
+                                messageReceivedEvent.getChannel().sendMessage(eb.build());
+                            });
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {}
+                            id++;
+                        }
+
+
+                    }
 
 
 
+                    else if (args[1].equalsIgnoreCase("fastplay")){
+                        String query = args[2];
+                        for(int i=3; i<args.length; i++){
+                            query += " "+ args[i];
+
+                        }
+                        List<String> results = null;
+                        try {
+                            results = Main.search.search(query);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        Main.loadAndPlay(messageReceivedEvent.getChannel(), results.get(0).split("!;;!")[1]);
+
+
+                    }
 
 
 
