@@ -49,7 +49,7 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                     else if(args[1].equalsIgnoreCase("infos")){
 
                         try {
-                            AudioTrackInfo infos = Main.musicManagers.get(338429681474863115L).player.getPlayingTrack().getInfo();
+                            AudioTrackInfo infos = Main.musicManagers.get(messageReceivedEvent.getGuild().getLongID()).player.getPlayingTrack().getInfo();
                             EmbedBuilder eb = new EmbedBuilder();
                             eb.withColor(Color.CYAN);
                             eb.withTitle("Track informations");

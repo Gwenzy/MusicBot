@@ -100,7 +100,7 @@ public class Main {
       public void trackLoaded(AudioTrack track) {
 
         play(channel.getGuild(), musicManager, track);
-        sendMessageToChannel(channel, "Now playing "+track.getInfo().title);
+        sendMessageToChannel(channel, "Adding to queue: "+track.getInfo().title);
       }
 
       public void playlistLoaded(AudioPlaylist playlist) {
