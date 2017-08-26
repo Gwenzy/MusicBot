@@ -1,5 +1,6 @@
 package fr.gwenzy.discord.music.events;
 
+import com.sedmelluq.discord.lavaplayer.tools.ExceptionTools;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import fr.gwenzy.discord.music.Main;
 import org.joda.time.Period;
@@ -70,12 +71,23 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                 if(args.length>2)
                     if(args[1].equalsIgnoreCase("play")){
                         String path = args[2];
+
+
                         for(int i=3; i<args.length; i++){
                             path += " "+ args[i];
 
                         }
-                        System.out.println("Playing "+path);
-                        Main.loadAndPlay(messageReceivedEvent.getChannel(), path);
+                        if(path.startsWith("#")&&Main.canUseIDs){
+                            try{
+                                Main.loadAndPlay(messageReceivedEvent.getChannel(), Main.videoIDs.get(path.replaceAll("#", "")));
+                                System.out.println("Playing "+Main.videoIDs.get(path.replaceAll("#", "")));
+                            }catch(Exception e){}
+                        }
+                        else {
+                            System.out.println("Playing " + path);
+
+                            Main.loadAndPlay(messageReceivedEvent.getChannel(), path);
+                        }
                     }
                     else if (args[1].equalsIgnoreCase("search")){
                         String query = args[2];

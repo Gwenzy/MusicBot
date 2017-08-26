@@ -27,7 +27,7 @@ import java.util.*;
 
 public class Main {
   private static final Logger log = LoggerFactory.getLogger(Main.class);
-  public static final List<String> operatorsID = Arrays.asList("205809466514472960", "224940744362819584", "214105906789613569");
+  public static final List<String> operatorsID = Arrays.asList("205809466514472960", "224940744362819584", "214105906789613569", "228176532722548736");
 
 
   public static final String COMMAND_PREFIX = "@Sagiri ";
