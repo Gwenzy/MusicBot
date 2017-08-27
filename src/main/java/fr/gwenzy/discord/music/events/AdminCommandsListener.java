@@ -77,17 +77,20 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                             path += " "+ args[i];
 
                         }
+
                         if(path.startsWith("#")&&Main.canUseIDs){
                             try{
-                                Main.loadAndPlay(messageReceivedEvent.getChannel(), Main.videoIDs.get(path.replaceAll("#", "")));
-                                System.out.println("Playing "+Main.videoIDs.get(path.replaceAll("#", "")));
-                            }catch(Exception e){}
+                                Main.loadAndPlay(messageReceivedEvent.getChannel(), Main.videoIDs.get(Integer.parseInt(path.replaceAll("#", ""))));
+                                path=Main.videoIDs.get(Integer.parseInt(path.replaceAll("#", "")));
+                            }catch(Exception e){
+                                e.printStackTrace();
+                            }
                         }
                         else {
-                            System.out.println("Playing " + path);
 
                             Main.loadAndPlay(messageReceivedEvent.getChannel(), path);
                         }
+                        System.out.println("Playing " + path);
                     }
                     else if (args[1].equalsIgnoreCase("search")){
                         String query = args[2];
@@ -126,7 +129,6 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                             eb.appendField("Duration", duration, false);
                             eb.appendField("Channel", channel, false);
                             eb.withThumbnail(thumbnailURL);
-                            System.out.println("URL: "+thumbnailURL);
                             Main.canUseIDs = true;
                             Main.videoIDs.put(id, videoID);
 
@@ -139,6 +141,9 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                             id++;
                         }
 
+                        for(String ID : Main.videoIDs.values()){
+                            System.out.println(ID);
+                        }
 
                     }
 
