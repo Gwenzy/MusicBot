@@ -2,6 +2,7 @@ package fr.gwenzy.discord.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import fr.gwenzy.discord.music.events.StartTrackListener;
 
 /**
  * Holder for both the player and a track scheduler for one guild.
@@ -22,6 +23,7 @@ public class GuildMusicManager {
    */
   public GuildMusicManager(AudioPlayerManager manager) {
     player = manager.createPlayer();
+    player.addListener(new StartTrackListener());
     scheduler = new TrackScheduler(player);
     player.addListener(scheduler);
   }

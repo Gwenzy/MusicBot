@@ -1,6 +1,5 @@
 package fr.gwenzy.discord.music.events;
 
-import com.sedmelluq.discord.lavaplayer.tools.ExceptionTools;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import fr.gwenzy.discord.music.Main;
 import org.joda.time.Period;
@@ -29,22 +28,22 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
 
 
 
-            if(Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()))
+
                 if(args.length>1)
-                    if(args[1].equalsIgnoreCase("join")){
+                    if(args[1].equalsIgnoreCase("join") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         messageReceivedEvent.getAuthor().getVoiceStateForGuild(messageReceivedEvent.getGuild()).getChannel().join();
                     }
-                    else if(args[1].equalsIgnoreCase("stop")){
+                    else if(args[1].equalsIgnoreCase("stop") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).player.stopTrack();
 
                     }
-                    else if(args[1].equalsIgnoreCase("leave")){
+                    else if(args[1].equalsIgnoreCase("leave") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         messageReceivedEvent.getAuthor().getVoiceStateForGuild(messageReceivedEvent.getGuild()).getChannel().leave();
                     }
-                    else if(args[1].equalsIgnoreCase("next")){
+                    else if(args[1].equalsIgnoreCase("next") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.nextTrack();
                     }
-                    else if(args[1].equalsIgnoreCase("disconnect")){
+                    else if(args[1].equalsIgnoreCase("disconnect") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         Main.client.logout();
                     }
                     else if(args[1].equalsIgnoreCase("infos")){
@@ -59,9 +58,12 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                             eb.appendField("Youtube Channel", infos.author, false);
                             eb.appendField("Duration", (infos.length/1000)+"s", false);
                             eb.appendField("URL", infos.uri, false);
+                            eb.appendField("Progress", ""+((System.currentTimeMillis()-Main.startingTimestamp)/1000)+"/"+(infos.length/1000)+"s - "+Math.round(((double)System.currentTimeMillis()-(double)Main.startingTimestamp)/(double)infos.length*100)+"% - "+((infos.length-System.currentTimeMillis()+Main.startingTimestamp)/1000)+"s left" , false);
 
                             messageReceivedEvent.getChannel().sendMessage(eb.build());
                             messageReceivedEvent.getMessage().delete();
+
+
 
                         }catch(Exception e){
                             messageReceivedEvent.getChannel().sendMessage("No song is currently playing");
@@ -70,28 +72,23 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                     }
                 if(args.length>2)
                     if(args[1].equalsIgnoreCase("play")){
+
+
                         String path = args[2];
-
-
                         for(int i=3; i<args.length; i++){
                             path += " "+ args[i];
 
                         }
-
-                        if(path.startsWith("#")&&Main.canUseIDs){
+                        if(path.startsWith("#")&&Main.canUseIDs)
                             try{
-                                Main.loadAndPlay(messageReceivedEvent.getChannel(), Main.videoIDs.get(Integer.parseInt(path.replaceAll("#", ""))));
-                                path=Main.videoIDs.get(Integer.parseInt(path.replaceAll("#", "")));
-                            }catch(Exception e){
-                                e.printStackTrace();
-                            }
-                        }
-                        else {
+                                path = Main.videoIDs.get(Integer.parseInt(path.substring(1, path.length())));
+                            }catch(Exception e){}
 
-                            Main.loadAndPlay(messageReceivedEvent.getChannel(), path);
-                        }
-                        System.out.println("Playing " + path);
+
+                        Main.loadAndPlay(messageReceivedEvent.getChannel(), path, messageReceivedEvent.getAuthor().getLongID());
+
                     }
+
                     else if (args[1].equalsIgnoreCase("search")){
                         String query = args[2];
                         for(int i=3; i<args.length; i++){
@@ -141,9 +138,6 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                             id++;
                         }
 
-                        for(String ID : Main.videoIDs.values()){
-                            System.out.println(ID);
-                        }
 
                     }
 
@@ -162,7 +156,7 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                             e.printStackTrace();
                         }
 
-                        Main.loadAndPlay(messageReceivedEvent.getChannel(), results.get(0).split("!;;!")[1]);
+                        Main.loadAndPlay(messageReceivedEvent.getChannel(), results.get(0).split("!;;!")[1], messageReceivedEvent.getAuthor().getLongID());
 
 
                     }

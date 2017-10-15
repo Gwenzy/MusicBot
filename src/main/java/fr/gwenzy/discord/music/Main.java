@@ -14,12 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.audio.IAudioManager;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.MissingPermissionsException;
 
@@ -34,7 +31,9 @@ public class Main {
     public static Search search;
   public static IDiscordClient client;
     public static HashMap<Integer, String> videoIDs = new HashMap<>();
+    public static List<Long> authors = new ArrayList<>();
     public static boolean canUseIDs = false;
+  public static long startingTimestamp;
 
 
   public static void main(String[] args) throws Exception {
@@ -55,6 +54,7 @@ public class Main {
     this.musicManagers = new HashMap();
 
     this.playerManager = new DefaultAudioPlayerManager();
+
     AudioSourceManagers.registerRemoteSources(playerManager);
     AudioSourceManagers.registerLocalSource(playerManager);
 
@@ -65,12 +65,13 @@ public class Main {
   }
 
   public static synchronized GuildMusicManager getGuildAudioPlayer(IGuild guild) {
-    long guildId = Long.parseLong(guild.getID());
+    long guildId = guild.getLongID();
     GuildMusicManager musicManager = musicManagers.get(guildId);
 
     if (musicManager == null) {
       musicManager = new GuildMusicManager(playerManager);
       musicManagers.put(guildId, musicManager);
+
     }
 
     guild.getAudioManager().setAudioProvider(musicManager.getAudioProvider());
@@ -78,29 +79,19 @@ public class Main {
     return musicManager;
   }
 
-  /*public void onMessageReceived(MessageReceivedEvent event) {
-    IMessage message = event.getMessage();
-
-    String[] command = message.getContent().split(" ", 2);
-    IGuild guild = message.getGuild();
-
-    if (guild != null) {
-      if ("~play".equals(command[0]) && command.length == 2) {
-        loadAndPlay(message.getChannel(), command[1]);
-      } else if ("~skip".equals(command[0])) {
-        skipTrack(message.getChannel());
-      }
-    }
-  }*/
-
-  public static void loadAndPlay(final IChannel channel, final String trackUrl) {
+  public static void loadAndPlay(final IChannel channel, final String trackUrl, long userID) {
     final GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
 
     playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
       public void trackLoaded(AudioTrack track) {
 
         play(channel.getGuild(), musicManager, track);
-        sendMessageToChannel(channel, "Adding to queue: "+track.getInfo().title);
+        authors.add(userID);
+        if(musicManager.scheduler.getQueueSize()==0)
+          sendMessageToChannel(channel, "Now playing: "+track.getInfo().title);
+        else
+          sendMessageToChannel(channel, "Added to queue: "+track.getInfo().title+". Queue rank : #"+musicManager.scheduler.getQueueSize());
+
       }
 
       public void playlistLoaded(AudioPlaylist playlist) {
@@ -115,9 +106,12 @@ public class Main {
       }
 
       public void noMatches() {
+        sendMessageToChannel(channel, "Nothing was found, try with something else");
+
       }
 
       public void loadFailed(FriendlyException exception) {
+        sendMessageToChannel(channel, "Error while attempting to loading track");
       }
     });
   }
@@ -126,6 +120,8 @@ public class Main {
     connectToFirstVoiceChannel(guild.getAudioManager());
 
     musicManager.scheduler.queue(track);
+
+
 
 
   }

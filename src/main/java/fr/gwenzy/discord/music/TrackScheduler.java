@@ -37,6 +37,9 @@ public class TrackScheduler extends AudioEventAdapter {
     }
   }
 
+  public int getQueueSize(){
+    return queue.size();
+  }
   /**
    * Start the next track, stopping the current one if it is playing.
    */

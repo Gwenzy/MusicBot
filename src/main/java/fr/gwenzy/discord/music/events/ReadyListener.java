@@ -15,10 +15,9 @@ public class ReadyListener implements IListener<ReadyEvent> {
             @Override
             public void run() {
                 try {
-
-                    Main.client.online("" + Main.musicManagers.get(224935534105985026L).player.getPlayingTrack().getInfo().title);
+                    Main.client.changePlayingText("" + Main.musicManagers.get(224935534105985026L).player.getPlayingTrack().getInfo().title);
                 }catch(Exception e){
-                    Main.client.idle("Nothing");
+                    Main.client.changePlayingText("Nothing");
                 }
             }
         }, 0, 1000);
