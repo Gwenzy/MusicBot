@@ -103,6 +103,8 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                         }
 
                         int id=1;
+                        if(results == null)
+                            messageReceivedEvent.getChannel().sendMessage("No results");
                         for(String str : results){
                             EmbedBuilder eb = new EmbedBuilder();
                             eb.withColor(Color.CYAN);
@@ -155,10 +157,11 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
-                        Main.loadAndPlay(messageReceivedEvent.getChannel(), results.get(0).split("!;;!")[1], messageReceivedEvent.getAuthor().getLongID());
-
-
+                        try {
+                            Main.loadAndPlay(messageReceivedEvent.getChannel(), results.get(0).split("!;;!")[1], messageReceivedEvent.getAuthor().getLongID());
+                        }catch(Exception e) {
+                            messageReceivedEvent.getChannel().sendMessage("No results");
+                        }
                     }
 
 

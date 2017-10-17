@@ -124,6 +124,8 @@ public class Search {
 
             }
         }
+        else
+            return null;
 
         return results;
     }
