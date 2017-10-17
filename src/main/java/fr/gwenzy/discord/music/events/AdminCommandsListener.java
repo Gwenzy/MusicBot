@@ -33,14 +33,14 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                     if(args[1].equalsIgnoreCase("join") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         messageReceivedEvent.getAuthor().getVoiceStateForGuild(messageReceivedEvent.getGuild()).getChannel().join();
                     }
-                    else if(args[1].equalsIgnoreCase("stop") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
+                    else if(args[1].equalsIgnoreCase("stop") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(messageReceivedEvent.getGuild().getLongID()).get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).player.stopTrack();
 
                     }
                     else if(args[1].equalsIgnoreCase("leave") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         messageReceivedEvent.getAuthor().getVoiceStateForGuild(messageReceivedEvent.getGuild()).getChannel().leave();
                     }
-                    else if(args[1].equalsIgnoreCase("next") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
+                    else if(args[1].equalsIgnoreCase("next") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(messageReceivedEvent.getGuild().getLongID()).get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.nextTrack();
                     }
                     else if(args[1].equalsIgnoreCase("disconnect") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){

@@ -31,7 +31,7 @@ public class Main {
     public static Search search;
   public static IDiscordClient client;
     public static HashMap<Integer, String> videoIDs = new HashMap<>();
-    public static List<Long> authors = new ArrayList<>();
+    public static HashMap<Long,List<Long>> authors = new HashMap<>();
     public static boolean canUseIDs = false;
   public static long startingTimestamp;
 
@@ -69,9 +69,9 @@ public class Main {
     GuildMusicManager musicManager = musicManagers.get(guildId);
 
     if (musicManager == null) {
-      musicManager = new GuildMusicManager(playerManager);
+      musicManager = new GuildMusicManager(playerManager, guildId);
       musicManagers.put(guildId, musicManager);
-
+      authors.put(guildId, new ArrayList<Long>());
     }
 
     guild.getAudioManager().setAudioProvider(musicManager.getAudioProvider());
@@ -86,7 +86,9 @@ public class Main {
       public void trackLoaded(AudioTrack track) {
 
         play(channel.getGuild(), musicManager, track);
-        authors.add(userID);
+        List<Long> author = authors.get(channel.getGuild().getLongID());
+        author.add(userID);
+        authors.put(channel.getGuild().getLongID(), author);
         if(musicManager.scheduler.getQueueSize()==0)
           sendMessageToChannel(channel, "Now playing: "+track.getInfo().title);
         else
