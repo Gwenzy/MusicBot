@@ -55,6 +55,22 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                     else if(args[1].equalsIgnoreCase("disconnect") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         Main.client.logout();
                     }
+                    else if(args[1].equalsIgnoreCase("help")){
+                        EmbedBuilder eb = new EmbedBuilder();
+                        eb.withColor(Color.GREEN);
+                        eb.withAuthorName(Main.client.getApplicationName());
+                        eb.withAuthorIcon(Main.client.getApplicationIconURL());
+                        eb.withFooterText("Music bot developped by "+Main.client.getUserByID(205809466514472960L).getDisplayName(messageReceivedEvent.getGuild()));
+                        eb.withTitle("Sagiri bot help <3\n-------------------------");
+                        eb.appendField("What does sagiri do ?", "Sagiri is a music bot able to provide music from different sources, able to search on youtube and play musics from previous search. Hope I'll be useful \\(^_^)/", false);
+                        eb.appendField("Play music from YT url", "@Sagiri play <YT Url/YT Video ID>", false);
+                        eb.appendField("Play music from YT search", "Will play 1st result from YT search\n@Sagiri fastplay <Search>", false);
+                        eb.appendField("Search musics on YT", "@Sagiri search <Search>", false);
+                        eb.appendField("Play music from previous Sagiri search", "@Sagiri play #<Result ID>\nResult ID is a number from 1 to 5", false);
+
+                        messageReceivedEvent.getChannel().sendMessage(eb.build());
+
+                    }
                     else if(args[1].equalsIgnoreCase("infos")){
 
                         try {
@@ -68,7 +84,7 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                             eb.appendField("Duration", (infos.length/1000)+"s", false);
                             eb.appendField("URL", infos.uri, false);
                             eb.appendField("Progress", ""+((System.currentTimeMillis()-Main.startingTimestamp)/1000)+"/"+(infos.length/1000)+"s - "+Math.round(((double)System.currentTimeMillis()-(double)Main.startingTimestamp)/(double)infos.length*100)+"% - "+((infos.length-System.currentTimeMillis()+Main.startingTimestamp)/1000)+"s left" , false);
-
+                            eb.appendField("User who added this music", Main.client.getUserByID(Main.currentAuthor.get(messageReceivedEvent.getGuild().getLongID())).mention()+"", false);
                             messageReceivedEvent.getChannel().sendMessage(eb.build());
                             messageReceivedEvent.getMessage().delete();
 
