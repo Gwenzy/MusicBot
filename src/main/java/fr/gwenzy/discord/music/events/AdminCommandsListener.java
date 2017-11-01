@@ -1,5 +1,6 @@
 package fr.gwenzy.discord.music.events;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import fr.gwenzy.discord.music.Main;
 import org.joda.time.Period;
@@ -33,14 +34,22 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                     if(args[1].equalsIgnoreCase("join") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         messageReceivedEvent.getAuthor().getVoiceStateForGuild(messageReceivedEvent.getGuild()).getChannel().join();
                     }
-                    else if(args[1].equalsIgnoreCase("stop") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(messageReceivedEvent.getGuild().getLongID()).get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
+                    else if(args[1].equalsIgnoreCase("stop") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()))){
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).player.stopTrack();
+
+                    }
+                    else if(args[1].equalsIgnoreCase("queue") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()))){
+                        System.out.println("Current song proposed by "+Main.currentAuthor.get(messageReceivedEvent.getGuild().getLongID()));
+                        List<AudioTrack> tracks = Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.getQueueTracks();
+                        for(int i=0; i<tracks.size(); i++){
+                            System.out.println("Track " + tracks.get(i).getInfo().title+" submitted by "+messageReceivedEvent.getGuild().getUserByID(Main.authors.get(messageReceivedEvent.getGuild().getLongID()).get(i)).getName());
+                        }
 
                     }
                     else if(args[1].equalsIgnoreCase("leave") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         messageReceivedEvent.getAuthor().getVoiceStateForGuild(messageReceivedEvent.getGuild()).getChannel().leave();
                     }
-                    else if(args[1].equalsIgnoreCase("next") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.authors.get(messageReceivedEvent.getGuild().getLongID()).get(0).equals(messageReceivedEvent.getAuthor().getLongID()))){
+                    else if(args[1].equalsIgnoreCase("next") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.currentAuthor.get(messageReceivedEvent.getGuild().getLongID()) == (messageReceivedEvent.getAuthor().getLongID()))){
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.nextTrack();
                     }
                     else if(args[1].equalsIgnoreCase("disconnect") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){

@@ -31,7 +31,8 @@ public class Main {
     public static Search search;
   public static IDiscordClient client;
     public static HashMap<Integer, String> videoIDs = new HashMap<>();
-    public static HashMap<Long,List<Long>> authors = new HashMap<>();
+  public static HashMap<Long,List<Long>> authors = new HashMap<>();
+  public static HashMap<Long,Long> currentAuthor = new HashMap<>();
     public static boolean canUseIDs = false;
   public static long startingTimestamp;
 

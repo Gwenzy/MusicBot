@@ -19,6 +19,7 @@ public class StartTrackListener implements AudioEventListener {
     public void onEvent(AudioEvent audioEvent) {
         Main.startingTimestamp = System.currentTimeMillis();
         List<Long> author = Main.authors.get(this.guildID);
+        Main.currentAuthor.put(this.guildID, author.get(0));
         author.remove(0);
         Main.authors.put(this.guildID, author);
 
