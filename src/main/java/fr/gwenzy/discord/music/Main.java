@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fr.gwenzy.discord.music.events.AdminCommandsListener;
+import fr.gwenzy.discord.music.events.PrivateMessageCommandsListener;
 import fr.gwenzy.discord.music.events.ReadyListener;
 import fr.gwenzy.discord.music.youtube.Search;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class Main {
     public static HashMap<Integer, String> videoIDs = new HashMap<>();
   public static HashMap<Long,List<Long>> authors = new HashMap<>();
   public static HashMap<Long,Long> currentAuthor = new HashMap<>();
+  public static HashMap<Long,List<Long>> nextCount = new HashMap<>();
     public static boolean canUseIDs = false;
   public static long startingTimestamp;
 
@@ -43,6 +45,7 @@ public class Main {
             .registerListener(new Main())
             .registerListener(new AdminCommandsListener())
             .registerListener(new ReadyListener())
+            .registerListener(new PrivateMessageCommandsListener())
         .login();
 
     search = new Search();
@@ -80,16 +83,15 @@ public class Main {
     return musicManager;
   }
 
-  public static void loadAndPlay(final IChannel channel, final String trackUrl, long userID) {
-    final GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
+  public static void loadAndPlay(final IChannel channel, final String trackUrl, long userID, IGuild guild) {
 
+    final GuildMusicManager musicManager = getGuildAudioPlayer(guild);
+    System.out.println("Loading "+trackUrl+" on "+guild.getLongID());
     playerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
       public void trackLoaded(AudioTrack track) {
 
-        play(channel.getGuild(), musicManager, track);
-        List<Long> author = authors.get(channel.getGuild().getLongID());
-        author.add(userID);
-        authors.put(channel.getGuild().getLongID(), author);
+        play(guild, musicManager, track, channel, userID);
+
         if(musicManager.scheduler.getQueueSize()==0)
           sendMessageToChannel(channel, "Now playing: "+track.getInfo().title);
         else
@@ -105,33 +107,33 @@ public class Main {
         }
 
 
-        play(channel.getGuild(), musicManager, firstTrack);
+        play(guild, musicManager, firstTrack, channel, userID);
       }
 
       public void noMatches() {
         sendMessageToChannel(channel, "Nothing was found, try with something else");
-
       }
 
       public void loadFailed(FriendlyException exception) {
         sendMessageToChannel(channel, "Error while attempting to loading track");
+        exception.printStackTrace();
       }
     });
   }
 
-  private static void play(IGuild guild, GuildMusicManager musicManager, AudioTrack track) {
+  private static void play(IGuild guild, GuildMusicManager musicManager, AudioTrack track, IChannel channel, long userID) {
     connectToFirstVoiceChannel(guild.getAudioManager());
 
-    musicManager.scheduler.queue(track);
+    musicManager.scheduler.queue(track, channel, userID, guild);
 
 
 
 
   }
 
-  private void skipTrack(IChannel channel) {
+  private void skipTrack(IChannel channel, long guildID) {
     GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
-    musicManager.scheduler.nextTrack();
+    musicManager.scheduler.nextTrack(null, guildID);
 
   }
 

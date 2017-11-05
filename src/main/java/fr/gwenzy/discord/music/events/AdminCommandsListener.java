@@ -24,6 +24,7 @@ import java.util.List;
  */
 public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
     public void handle(MessageReceivedEvent messageReceivedEvent) {
+        if(!messageReceivedEvent.getChannel().isPrivate())
         if(messageReceivedEvent.getMessage().getFormattedContent().startsWith(Main.COMMAND_PREFIX)){
             String[] args = messageReceivedEvent.getMessage().getFormattedContent().split(" ");
 
@@ -38,19 +39,38 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                         Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).player.stopTrack();
 
                     }
-                    else if(args[1].equalsIgnoreCase("queue") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()))){
+                    else if(args[1].equalsIgnoreCase("queue")){
                         System.out.println("Current song proposed by "+Main.currentAuthor.get(messageReceivedEvent.getGuild().getLongID()));
                         List<AudioTrack> tracks = Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.getQueueTracks();
                         for(int i=0; i<tracks.size(); i++){
-                            System.out.println("Track " + tracks.get(i).getInfo().title+" submitted by "+messageReceivedEvent.getGuild().getUserByID(Main.authors.get(messageReceivedEvent.getGuild().getLongID()).get(i)).getName());
+                            final int iFinal = i;
+                            RequestBuffer.request(()->{
+                                messageReceivedEvent.getChannel().sendMessage("Queue rank #"+(iFinal+1)+" : sumbitted by "+messageReceivedEvent.getGuild().getUserByID(Main.authors.get(messageReceivedEvent.getGuild().getLongID()).get(iFinal)).getName()+" - "+tracks.get(iFinal).getInfo().title);
+                            });
                         }
 
                     }
                     else if(args[1].equalsIgnoreCase("leave") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         messageReceivedEvent.getAuthor().getVoiceStateForGuild(messageReceivedEvent.getGuild()).getChannel().leave();
                     }
-                    else if(args[1].equalsIgnoreCase("next") && (Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.currentAuthor.get(messageReceivedEvent.getGuild().getLongID()) == (messageReceivedEvent.getAuthor().getLongID()))){
-                        Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.nextTrack();
+                    else if(args[1].equalsIgnoreCase("next")){
+                        if(Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID()) || Main.currentAuthor.get(messageReceivedEvent.getGuild().getLongID()) == (messageReceivedEvent.getAuthor().getLongID())){
+                            Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.nextTrack(messageReceivedEvent.getChannel(), messageReceivedEvent.getGuild().getLongID());
+                        }
+                        else if(Main.nextCount.get(messageReceivedEvent.getGuild().getLongID()).contains(messageReceivedEvent.getAuthor().getLongID())&&Main.nextCount.get(messageReceivedEvent.getGuild().getLongID()).size()>=0.4*messageReceivedEvent.getGuild().getConnectedVoiceChannel().getUsersHere().size() ||
+                                (!Main.nextCount.get(messageReceivedEvent.getGuild().getLongID()).contains(messageReceivedEvent.getAuthor().getLongID())&&Main.nextCount.get(messageReceivedEvent.getGuild().getLongID()).size()+1>=0.4*messageReceivedEvent.getGuild().getConnectedVoiceChannel().getUsersHere().size())){
+                                Main.getGuildAudioPlayer(messageReceivedEvent.getGuild()).scheduler.nextTrack(messageReceivedEvent.getChannel(), messageReceivedEvent.getGuild().getLongID());
+                        }
+                        else if(Main.nextCount.get(messageReceivedEvent.getGuild().getLongID()).contains(messageReceivedEvent.getAuthor().getLongID())){
+                            messageReceivedEvent.getChannel().sendMessage("Vous avez déjà demandé à passer cette musique, au moins 40% des personnes doivent indiquer vouloir passer pour forcer le passage à la musique suivante : "+Main.nextCount.get(messageReceivedEvent.getGuild().getLongID())+"/"+messageReceivedEvent.getGuild().getConnectedVoiceChannel().getUsersHere().size());
+                        }
+                        else if(!Main.nextCount.get(messageReceivedEvent.getGuild().getLongID()).contains(messageReceivedEvent.getAuthor().getLongID())){
+                            List<Long> next = Main.nextCount.get(messageReceivedEvent.getGuild().getLongID());
+                            next.add(messageReceivedEvent.getAuthor().getLongID());
+                            Main.nextCount.put(messageReceivedEvent.getGuild().getLongID(), next);
+
+                            messageReceivedEvent.getChannel().sendMessage("Vous avez demandé à passer cette musique, au moins 40% des personnes doivent indiquer vouloir passer pour forcer le passage à la musique suivante : "+Main.nextCount.get(messageReceivedEvent.getGuild().getLongID())+"/"+messageReceivedEvent.getGuild().getConnectedVoiceChannel().getUsersHere().size());
+                        }
                     }
                     else if(args[1].equalsIgnoreCase("disconnect") && Main.operatorsID.contains(messageReceivedEvent.getAuthor().getStringID())){
                         Main.client.logout();
@@ -96,102 +116,101 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
                         }
                     }
                 if(args.length>2)
-                    if(args[1].equalsIgnoreCase("play")){
+                    if(!messageReceivedEvent.getGuild().getConnectedVoiceChannel().getUsersHere().contains(messageReceivedEvent.getAuthor())){
+                        messageReceivedEvent.getChannel().sendMessage("Pour des raisons évidentes, vous ne pouvez pas jouer de musique ni effectuer les commandes de recherche si vous n'êtes pas dans le canal vocal du bot.");
+
+                    }else {
+                        if (args[1].equalsIgnoreCase("play")) {
 
 
-                        String path = args[2];
-                        for(int i=3; i<args.length; i++){
-                            path += " "+ args[i];
+                            String path = args[2];
+                            for (int i = 3; i < args.length; i++) {
+                                path += " " + args[i];
 
-                        }
-                        if(path.startsWith("#")&&Main.canUseIDs)
-                            try{
-                                path = Main.videoIDs.get(Integer.parseInt(path.substring(1, path.length())));
-                            }catch(Exception e){}
-
-
-                        Main.loadAndPlay(messageReceivedEvent.getChannel(), path, messageReceivedEvent.getAuthor().getLongID());
-
-                    }
-
-                    else if (args[1].equalsIgnoreCase("search")){
-                        String query = args[2];
-                        for(int i=3; i<args.length; i++){
-                            query += " "+ args[i];
-
-                        }
-                        List<String> results = null;
-                        try {
-                            results = Main.search.search(query);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        int id=1;
-                        if(results == null)
-                            messageReceivedEvent.getChannel().sendMessage("No results");
-                        for(String str : results){
-                            EmbedBuilder eb = new EmbedBuilder();
-                            eb.withColor(Color.CYAN);
-                            eb.withTitle("Query result | ID #"+id);
-                            eb.withDesc("------------------------------------------------------------------");
-
-                            String title = str.split("!;;!")[0];
-                            String videoID = str.split("!;;!")[1];
-                            String duration = str.split("!;;!")[2];
-                            String channel = str.split("!;;!")[3];
-                            String thumbnailURL = str.split("!;;!")[4];
-
-                            PeriodFormatter formatter = ISOPeriodFormat.standard();
-                            Period p = formatter.parsePeriod(duration);
-                            duration = String.format("%02d", p.getMinutes())+":"+String.format("%02d", p.getSeconds());
+                            }
+                            if (path.startsWith("#") && Main.canUseIDs)
+                                try {
+                                    path = Main.videoIDs.get(Integer.parseInt(path.substring(1, path.length())));
+                                } catch (Exception e) {
+                                }
 
 
-                            eb.appendField("Title", title, false);
-                            eb.appendField("ID", videoID, false);
+                            Main.loadAndPlay(messageReceivedEvent.getChannel(), path, messageReceivedEvent.getAuthor().getLongID(), messageReceivedEvent.getGuild());
 
-                            eb.appendField("Duration", duration, false);
-                            eb.appendField("Channel", channel, false);
-                            eb.withThumbnail(thumbnailURL);
-                            Main.canUseIDs = true;
-                            Main.videoIDs.put(id, videoID);
+                        } else if (args[1].equalsIgnoreCase("search")) {
+                            String query = args[2];
+                            for (int i = 3; i < args.length; i++) {
+                                query += " " + args[i];
 
-                            RequestBuffer.request(() -> {
-                                messageReceivedEvent.getChannel().sendMessage(eb.build());
-                            });
+                            }
+                            List<String> results = null;
                             try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e) {}
-                            id++;
+                                results = Main.search.search(query);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            int id = 1;
+                            if (results == null)
+                                messageReceivedEvent.getChannel().sendMessage("No results");
+                            for (String str : results) {
+                                EmbedBuilder eb = new EmbedBuilder();
+                                eb.withColor(Color.CYAN);
+                                eb.withTitle("Query result | ID #" + id);
+                                eb.withDesc("------------------------------------------------------------------");
+
+                                String title = str.split("!;;!")[0];
+                                String videoID = str.split("!;;!")[1];
+                                String duration = str.split("!;;!")[2];
+                                String channel = str.split("!;;!")[3];
+                                String thumbnailURL = str.split("!;;!")[4];
+
+                                PeriodFormatter formatter = ISOPeriodFormat.standard();
+                                Period p = formatter.parsePeriod(duration);
+                                duration = String.format("%02d", p.getMinutes()) + ":" + String.format("%02d", p.getSeconds());
+
+
+                                eb.appendField("Title", title, false);
+                                eb.appendField("ID", videoID, false);
+
+                                eb.appendField("Duration", duration, false);
+                                eb.appendField("Channel", channel, false);
+                                eb.withThumbnail(thumbnailURL);
+                                Main.canUseIDs = true;
+                                Main.videoIDs.put(id, videoID);
+
+                                RequestBuffer.request(() -> {
+                                    messageReceivedEvent.getChannel().sendMessage(eb.build());
+                                });
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                }
+                                id++;
+                            }
+
+
+                        } else if (args[1].equalsIgnoreCase("fastplay")) {
+                            String query = args[2];
+                            for (int i = 3; i < args.length; i++) {
+                                query += " " + args[i];
+
+                            }
+                            List<String> results = null;
+                            try {
+                                results = Main.search.search(query);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                Main.loadAndPlay(messageReceivedEvent.getChannel(), results.get(0).split("!;;!")[1], messageReceivedEvent.getAuthor().getLongID(), messageReceivedEvent.getGuild());
+                            } catch (Exception e) {
+                                messageReceivedEvent.getChannel().sendMessage("No results");
+                            }
                         }
 
 
                     }
-
-
-
-                    else if (args[1].equalsIgnoreCase("fastplay")){
-                        String query = args[2];
-                        for(int i=3; i<args.length; i++){
-                            query += " "+ args[i];
-
-                        }
-                        List<String> results = null;
-                        try {
-                            results = Main.search.search(query);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            Main.loadAndPlay(messageReceivedEvent.getChannel(), results.get(0).split("!;;!")[1], messageReceivedEvent.getAuthor().getLongID());
-                        }catch(Exception e) {
-                            messageReceivedEvent.getChannel().sendMessage("No results");
-                        }
-                    }
-
-
-
-
 
 
         }

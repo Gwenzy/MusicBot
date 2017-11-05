@@ -4,6 +4,9 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import fr.gwenzy.discord.music.events.StartTrackListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Holder for both the player and a track scheduler for one guild.
  */
@@ -24,8 +27,10 @@ public class GuildMusicManager {
   public GuildMusicManager(AudioPlayerManager manager, long guildID) {
     player = manager.createPlayer();
     player.addListener(new StartTrackListener(guildID));
-    scheduler = new TrackScheduler(player);
+    scheduler = new TrackScheduler(player, guildID);
     player.addListener(scheduler);
+    List<Long> authors = new ArrayList<>();
+    Main.authors.put(guildID, authors);
   }
 
   /**
