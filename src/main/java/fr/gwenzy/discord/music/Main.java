@@ -117,7 +117,7 @@ public class Main {
       }
 
       public void loadFailed(FriendlyException exception) {
-        sendMessageToChannel(channel, "Error while attempting to loading track");
+        sendMessageToChannel(channel, "Error while attempting to load track");
         exception.printStackTrace();
       }
     });
