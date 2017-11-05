@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import fr.gwenzy.discord.music.events.AdminCommandsListener;
+import fr.gwenzy.discord.music.events.DevelopperCommandsListener;
 import fr.gwenzy.discord.music.events.PrivateMessageCommandsListener;
 import fr.gwenzy.discord.music.events.ReadyListener;
 import fr.gwenzy.discord.music.youtube.Search;
@@ -46,6 +47,7 @@ public class Main {
             .registerListener(new AdminCommandsListener())
             .registerListener(new ReadyListener())
             .registerListener(new PrivateMessageCommandsListener())
+            .registerListener(new DevelopperCommandsListener())
         .login();
 
     search = new Search();

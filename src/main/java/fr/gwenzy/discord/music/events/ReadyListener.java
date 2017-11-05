@@ -14,11 +14,7 @@ public class ReadyListener implements IListener<ReadyEvent> {
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    Main.client.changePlayingText("" + Main.musicManagers.get(224935534105985026L).player.getPlayingTrack().getInfo().title);
-                }catch(Exception e){
-                    Main.client.changePlayingText("Nothing");
-                }
+                Main.client.changePlayingText("music");
             }
         }, 0, 1000);
     }
