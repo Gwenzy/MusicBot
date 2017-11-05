@@ -27,14 +27,24 @@ public class DevelopperCommandsListener implements IListener<MessageReceivedEven
                 String message = messageReceivedEvent.getMessage().getFormattedContent();
                 while(message.contains("  ")){message = message.replaceAll("  ", " ");}
                 String[] args = message.split(" ");
-                    if(args.length==2){
+                    if(args.length>=2){
                         if(args[1].equalsIgnoreCase("streamon")){
                             Main.client.streaming("My author is improving me !", "https://www.twitch.tv/thaksin_");
+                            Main.client.changePlayingText("My author is improving me !");
                             messageReceivedEvent.getChannel().sendMessage("Streaming mode is now enabled");
                         }
                         else if(args[1].equalsIgnoreCase("streamoff")){
                             Main.client.online("music");
                             messageReceivedEvent.getChannel().sendMessage("Streaming mode is now disabled");
+                        }
+                        else if(args[1].equalsIgnoreCase("playingtext")){
+                            String playText = "";
+                            for(int i=2; i<args.length-1; i++){
+                                playText += args[i] + " ";
+                            }
+                            playText += args[args.length-1];
+                            Main.client.changePlayingText(playText);
+                            messageReceivedEvent.getChannel().sendMessage("Playing text is now "+playText);
                         }
 
                     }

@@ -26,7 +26,7 @@ public class PrivateMessageCommandsListener implements IListener<MessageReceived
                 String message = messageReceivedEvent.getMessage().getFormattedContent();
                 while(message.contains("  ")){message = message.replaceAll("  ", " ");}
                 String[] args = message.split(" ");
-            Long guildID = Long.parseLong(args[2]);
+                Long guildID = Long.parseLong(args[2]);
 
 
                 if(args.length>2)
