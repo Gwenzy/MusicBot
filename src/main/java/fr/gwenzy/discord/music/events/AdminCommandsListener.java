@@ -26,7 +26,9 @@ public class AdminCommandsListener implements IListener<MessageReceivedEvent> {
     public void handle(MessageReceivedEvent messageReceivedEvent) {
         if(!messageReceivedEvent.getChannel().isPrivate())
         if(messageReceivedEvent.getMessage().getFormattedContent().startsWith(Main.COMMAND_PREFIX)){
-            String[] args = messageReceivedEvent.getMessage().getFormattedContent().split(" ");
+            String message = messageReceivedEvent.getMessage().getFormattedContent();
+            while(message.contains("  ")){message = message.replaceAll("  ", " ");}
+            String[] args = message.split(" ");
 
 
 
